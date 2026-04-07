@@ -1,0 +1,45 @@
+# ── Entorno virtual ──────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# ── Jupyter ──────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── pytest / coverage ────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── IDEs ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+
+# ── Archivos TXT (todo el proyecto) ──────────────────────
+*.txt
+
+# ── Archivos XLSX dentro de python project ───────────────
+python project/*.xlsx
+python project/*.xlsx.zip
