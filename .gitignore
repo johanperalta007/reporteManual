@@ -43,3 +43,9 @@ htmlcov/
 # ── Archivos XLSX dentro de python project ───────────────
 python project/*.xlsx
 python project/*.xlsx.zip
+
+# ── Archivos XLSX dentro de excelFiles (excepto los de referencia) ───
+python project/excelFiles/*.xlsx
+python project/excelFiles/*.xlsx.zip
+!python project/excelFiles/Reporte de Suite_Digital.xlsx
+!python project/excelFiles/Copia de Reporte de Suite_Digital.xlsx
