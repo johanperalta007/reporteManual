@@ -7,10 +7,11 @@ from openpyxl.styles import Font, Color
 from copy import copy
 
 # --- CONFIGURACIÓN GENERAL ---
-ARCHIVO_PRICING = "Report_Pricing_2026-04-01_12_02_20-0500.xlsx"
-ARCHIVO_SUITE = "Reporte de Suite_Digital.xlsx"
+CARPETA_EXCEL = "excelFiles"
+ARCHIVO_PRICING = os.path.join(CARPETA_EXCEL, "Reporte Pricing 07-04-2026.xlsx")
+ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, "Reporte de Suite_Digital.xlsx")
 CARPETA_TXT = "desembolsos_diarios"
-SALIDA_FINAL = "Reporte_Pricing_Actualizado_Color.xlsx"
+SALIDA_FINAL = os.path.join(CARPETA_EXCEL, "Reporte_Pricing_Actualizado_ColorJP3_07_04_2026.xlsx")
 
 # Columnas Excel (según tu captura)
 COL_SPREAD_REAL = "AT"        # Spread
@@ -20,6 +21,18 @@ COL_DESVIACION = "AV"         # Desviación (pintar esta)
 # Colores de fuente (ARGB)
 COLOR_VERDE = "FF00B050"
 COLOR_ROJO = "FFC00000"
+
+def normalizar_numero_credito(valor):
+    if pd.isna(valor) or str(valor).strip() == '':
+        return valor
+    # Eliminar decimales si viene como float (ej: 1057825976.0 -> 1057825976)
+    numero = str(valor).strip()
+    if '.' in numero:
+        numero = numero.split('.')[0]
+    if len(numero) >= 14:
+        return numero
+    # Rellenar con ceros a la izquierda hasta 14
+    return numero.zfill(14)
 
 # ------------------------------------------------------
 def cargar_archivos_base():
@@ -109,6 +122,9 @@ def unir_y_poblar(df_pricing, df_suite, df_txt):
 
     df_final = df_final.sort_values(by=["Número Cotización", "prioridad"], ascending=[True, True])
     df_final = df_final.drop_duplicates(subset=["Número Cotización"], keep="first")
+
+    # Normalizar Número de Crédito 1: ceros a la izquierda hasta 14 dígitos
+    df_final['Número de Crédito 1'] = df_final['Número de Crédito 1'].apply(normalizar_numero_credito)
 
     # Orden final
     df_final = df_final.sort_values(by="Número Cotización", ascending=True)

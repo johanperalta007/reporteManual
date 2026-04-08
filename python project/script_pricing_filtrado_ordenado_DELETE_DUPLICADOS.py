@@ -2,10 +2,23 @@ import pandas as pd
 import os
 from datetime import datetime
 # --- CONFIGURACIÓN GENERAL ---
-ARCHIVO_PRICING = "Reporte Pricing 07-04-2026.xlsx"
-ARCHIVO_SUITE = "Reporte de Suite_Digital.xlsx"
+CARPETA_EXCEL = "excelFiles"
+ARCHIVO_PRICING = os.path.join(CARPETA_EXCEL, "Reporte Pricing 07-04-2026.xlsx")
+ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, "Reporte de Suite_Digital.xlsx")
 CARPETA_TXT = "desembolsos_diarios"
-SALIDA_FINAL = "Reporte_Pricing_Actualizado_07_04_2026.xlsx"
+SALIDA_FINAL = os.path.join(CARPETA_EXCEL, "Reporte_Pricing_PruebasJP2.xlsx")
+# ------------------------------------------------------
+def normalizar_numero_credito(valor):
+    if pd.isna(valor) or str(valor).strip() == '':
+        return valor
+    # Eliminar decimales si viene como float (ej: 1057825976.0 -> 1057825976)
+    numero = str(valor).strip()
+    if '.' in numero:
+        numero = numero.split('.')[0]
+    if len(numero) >= 14:
+        return numero
+    # Rellenar con ceros a la izquierda hasta 14
+    return numero.zfill(14)
 # ------------------------------------------------------
 def cargar_archivos_base():
     df_pricing = pd.read_excel(ARCHIVO_PRICING)
@@ -92,6 +105,9 @@ def unir_y_poblar(df_pricing, df_suite, df_txt):
         ascending=[True, True]
     )
     df_final = df_final.drop_duplicates(subset=["Número Cotización"], keep="first")
+    # ------------------------------------------------------
+    # Normalizar Número de Crédito 1: ceros a la izquierda hasta 14 dígitos
+    df_final['Número de Crédito 1'] = df_final['Número de Crédito 1'].apply(normalizar_numero_credito)
     # ------------------------------------------------------
     # Orden final
     df_final = df_final.sort_values(by="Número Cotización", ascending=True)
