@@ -35,7 +35,7 @@ python "script_pricing_filtrado_ordenado_mantiene color AV.py"
 ### 3. Para ejecutar RPA del proyecto
 
 ```
-python rpa_descarga_mft.py
+python rpa_descarga_mft.py§
 ```
 
 ### 4. Para ejecutar Interfaz Gráfica
