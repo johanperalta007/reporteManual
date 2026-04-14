@@ -1,22 +1,28 @@
 import pandas as pd
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Color
 from copy import copy
 
-# --- CONFIGURACIÓN GENERAL ---
-CARPETA_EXCEL = "excelFiles"
-ARCHIVO_PRICING = os.path.join(CARPETA_EXCEL, "Reporte Pricing 07-04-2026.xlsx")
-ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, "Reporte de Suite_Digital.xlsx")
-CARPETA_TXT = "desembolsos_diarios"
-SALIDA_FINAL = os.path.join(CARPETA_EXCEL, "Reporte_Pricing_Actualizado_ColorJP3_07_04_2026.xlsx")
+# --- CARGAR CONFIGURACIÓN DESDE .env ---
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
-# Columnas Excel (según tu captura)
-COL_SPREAD_REAL = "AT"        # Spread
-COL_SPREAD_SUGERIDO = "AU"    # Spread Sugerido
-COL_DESVIACION = "AV"         # Desviación (pintar esta)
+CARPETA_EXCEL = os.getenv("CARPETA_EXCEL", "excelFiles")
+ARCHIVO_PRICING = os.path.join(CARPETA_EXCEL, os.getenv("ARCHIVO_PRICING", ""))
+ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, os.getenv("ARCHIVO_SUITE", "Reporte de Suite_Digital.xlsx"))
+CARPETA_TXT = os.getenv("CARPETA_TXT", "desembolsos_diarios")
+
+# Nombre de salida calculado automáticamente con la fecha de hoy
+hoy = datetime.now().strftime("%d-%m-%Y")
+SALIDA_FINAL = os.path.join(CARPETA_EXCEL, f"Reporte_Pricing_Actualizado_{hoy}.xlsx")
+
+# Columnas Excel para regla de color (fijas, no se modifican)
+COL_SPREAD_REAL = "AT"
+COL_SPREAD_SUGERIDO = "AU"
+COL_DESVIACION = "AV"
 
 # Colores de fuente (ARGB)
 COLOR_VERDE = "FF00B050"

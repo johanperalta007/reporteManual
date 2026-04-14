@@ -6,7 +6,7 @@ CARPETA_EXCEL = "excelFiles"
 ARCHIVO_PRICING = os.path.join(CARPETA_EXCEL, "Reporte Pricing 07-04-2026.xlsx")
 ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, "Reporte de Suite_Digital.xlsx")
 CARPETA_TXT = "desembolsos_diarios"
-SALIDA_FINAL = os.path.join(CARPETA_EXCEL, "Reporte_Pricing_PruebasJP2.xlsx")
+SALIDA_FINAL = os.path.join(CARPETA_EXCEL, "Reporte_Pricing_PruebasJP4.xlsx")
 # ------------------------------------------------------
 def normalizar_numero_credito(valor):
     if pd.isna(valor) or str(valor).strip() == '':

@@ -14,6 +14,10 @@ python3 -m venv venv
 source venv/bin/activate
 
 pip install pandas openpyxl
+
+pip install selenium webdriver-manager
+
+pip install python-dotenv || pip3 install python-dotenv
 ```
 
 
@@ -26,3 +30,10 @@ python "script_pricing_filtrado_ordenado_DELETE_DUPLICADOS.py"
 ```
 python "script_pricing_filtrado_ordenado_mantiene color AV.py"
 ```
+
+### 3. Para ejecutar RPA del proyecto
+
+```
+python rpa_descarga_mft.py
+```
+
