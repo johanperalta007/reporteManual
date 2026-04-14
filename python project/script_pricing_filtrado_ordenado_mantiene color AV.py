@@ -10,14 +10,14 @@ from copy import copy
 # --- CARGAR CONFIGURACIÓN DESDE .env ---
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
-CARPETA_EXCEL = os.getenv("CARPETA_EXCEL", "excelFiles")
+CARPETA_EXCEL = "excelFiles"
 ARCHIVO_PRICING = os.path.join(CARPETA_EXCEL, os.getenv("ARCHIVO_PRICING", ""))
-ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, os.getenv("ARCHIVO_SUITE", "Reporte de Suite_Digital.xlsx"))
-CARPETA_TXT = os.getenv("CARPETA_TXT", "desembolsos_diarios")
+ARCHIVO_SUITE = os.path.join(CARPETA_EXCEL, "Reporte de Suite_Digital.xlsx")
+CARPETA_TXT = "desembolsos_diarios"
 
 # Nombre de salida calculado automáticamente con la fecha de hoy
 hoy = datetime.now().strftime("%d-%m-%Y")
-SALIDA_FINAL = os.path.join(CARPETA_EXCEL, f"Reporte_Pricing_Actualizado_{hoy}.xlsx")
+SALIDA_FINAL = os.path.join(CARPETA_EXCEL, f"Reporte Pricing Actualizado_{hoy}.xlsx")
 
 # Columnas Excel para regla de color (fijas, no se modifican)
 COL_SPREAD_REAL = "AT"

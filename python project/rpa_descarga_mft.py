@@ -13,6 +13,13 @@ import time
 import shutil
 import zipfile
 import subprocess
+import ssl
+import urllib3
+
+# Deshabilitar verificación SSL (necesario por proxy corporativo)
+os.environ['WDM_SSL_VERIFY'] = '0'
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
