@@ -1,50 +1,140 @@
-## CREDENCIALES BANCO
+# 📊 Reporte Pricing - Banco de Bogotá
 
-### Usuario: carlos.angulo
-### Contraseña: m<t6fFui
-### URL: (https://mft.bancodebogota.com.co:4443/webclient/Login.xhtml)
+> **Powered By ADL - JP Data Systems**
 
+Herramienta para automatizar la generación del reporte de Pricing con desembolsos diarios.
 
-## PROCESO PARA GENERAR REPORTE CON DESEMBOLSOS
+---
 
-### 1. Limpiar variables de entorno e instalar los propias
+## 🔐 Credenciales MFT
 
-```
-pip install pandas openpyxl
+| Campo       | Valor                                                              |
+|-------------|--------------------------------------------------------------------|
+| Usuario     | `carlos.angulo`                                                    |
+| Contraseña  | `m<t6fFui`                                                         |
+| URL         | https://mft.bancodebogota.com.co:4443/webclient/Login.xhtml        |
 
-pip install selenium webdriver-manager
+---
 
-pip install python-dotenv || pip3 install python-dotenv
-```
+## 🛠️ Instalación del entorno de desarrollo
 
-```
-python3 -m venv venv
-source venv/bin/activate
-```
+### Requisitos previos
 
-### 2. Para ejecutar (RUN) el proyecto
+- Python 3.13 (instalar con `brew install python-tk@3.13` en Mac)
+- Google Chrome instalado
 
-```
-python "script_pricing_filtrado_ordenado_DELETE_DUPLICADOS.py"
-```
+### 1. Crear entorno virtual
 
-```
-python "script_pricing_filtrado_ordenado_mantiene color AV.py"
-```
-
-### 3. Para ejecutar RPA del proyecto
-
-```
-python rpa_descarga_mft.py§
-```
-
-### 4. Para ejecutar Interfaz Gráfica
-
-```
+```bash
+cd "/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project"
 python3.13 -m venv venv313
 source venv313/bin/activate
 ```
 
+### 2. Instalar dependencias
+
+```bash
+pip install pandas openpyxl customtkinter selenium webdriver-manager python-dotenv Pillow pyinstaller
 ```
+
+---
+
+## 🚀 Ejecución
+
+### Interfaz gráfica (recomendado)
+
+```bash
+source venv313/bin/activate
 python app_pricing.py
 ```
+
+### RPA por terminal (descarga + procesamiento)
+
+```bash
+source venv313/bin/activate
+python rpa_descarga_mft.py
+```
+
+### Script de pricing por terminal
+
+```bash
+source venv313/bin/activate
+python "script_pricing_filtrado_ordenado_mantiene color AV.py"
+```
+
+---
+
+## 📦 Generar instalador
+
+### 🍎 Mac (.dmg)
+
+**Paso 1:** Ubicarse en la carpeta del proyecto y activar el entorno:
+
+```bash
+cd "/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project"
+source venv313/bin/activate
+```
+
+**Paso 2:** Generar el `.app`:
+
+```bash
+python build_app.py
+```
+
+**Paso 3:** Generar el `.dmg` (instalador distribuible):
+
+```bash
+create-dmg \
+  --volname "Reporte Pricing" \
+  --window-pos 200 120 \
+  --window-size 600 400 \
+  --icon-size 100 \
+  --icon "Reporte Pricing.app" 150 190 \
+  --app-drop-link 450 190 \
+  --no-internet-enable \
+  "dist/Reporte_Pricing_Installer.dmg" \
+  "dist/Reporte Pricing.app"
+```
+
+**Resultado:** `dist/Reporte_Pricing_Installer.dmg`
+
+> 💡 Si no tienes `create-dmg`, instálalo con: `brew install create-dmg`
+
+---
+
+### 🪟 Windows (.exe)
+
+**Paso 1:** Abrir PowerShell y ubicarse en la carpeta del proyecto.
+
+**Paso 2:** Crear entorno virtual *(solo la primera vez)*:
+
+```bash
+python -m venv venv313
+venv313\Scripts\activate
+pip install pandas openpyxl customtkinter selenium webdriver-manager Pillow pyinstaller
+```
+
+**Paso 3:** Activar entorno virtual *(si ya existe)*:
+
+```bash
+venv313\Scripts\activate
+```
+
+**Paso 4:** Generar el `.exe`:
+
+```bash
+python build_app.py
+```
+
+**Resultado:** `dist\Reporte Pricing\Reporte Pricing.exe`
+
+> 💡 Para distribuir, comprimir la carpeta `dist\Reporte Pricing\` en un `.zip` y enviar a los compañeros.
+
+---
+
+## ⚠️ Notas importantes
+
+- Cada vez que modifiques `app_pricing.py`, hay que regenerar el instalador.
+- El instalador de **Mac solo funciona en Mac**, el de **Windows solo en Windows**. No hay cross-compile.
+- Si agregas una nueva dependencia con `pip install`, hay que regenerar el instalador.
+- El archivo `.env` solo contiene el nombre del archivo de Pricing de entrada. Es lo único que se edita manualmente cuando se corre por terminal.

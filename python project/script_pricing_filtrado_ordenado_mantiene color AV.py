@@ -17,7 +17,7 @@ CARPETA_TXT = "desembolsos_diarios"
 
 # Nombre de salida calculado automáticamente con la fecha de hoy
 hoy = datetime.now().strftime("%d-%m-%Y")
-SALIDA_FINAL = os.path.join(CARPETA_EXCEL, f"Reporte Pricing Actualizado_{hoy}.xlsx")
+SALIDA_FINAL = os.path.join(CARPETA_EXCEL, f"Reporte_Pricing_Actualizado_{hoy}.xlsx")
 
 # Columnas Excel para regla de color (fijas, no se modifican)
 COL_SPREAD_REAL = "AT"

@@ -1,21 +1,38 @@
 """
 App Reporte Pricing - Interfaz Gráfica
-Permite seleccionar archivo de Pricing y carpeta de salida.
+Descarga archivos desde MFT (RPA) y genera el reporte de Pricing.
 Muestra el progreso en tiempo real en una consola integrada.
 
 Requisitos:
-    pip3 install pandas openpyxl customtkinter
+    pip3 install pandas openpyxl customtkinter selenium webdriver-manager
 """
 
 import os
 import sys
+import glob
+import time
+import shutil
+import zipfile
 import threading
 from datetime import datetime
+import urllib3
+
+# Deshabilitar verificación SSL (necesario por proxy corporativo)
+os.environ['WDM_SSL_VERIFY'] = '0'
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
+
+# --- Configuración RPA ---
+URL_MFT = "https://mft.bancodebogota.com.co:4443/webclient/Login.xhtml"
+USUARIO = "carlos.angulo"
+PASSWORD = "m<t6fFui"
+CARPETA_DESCARGA = "/Users/johan.peralta/Downloads"
+TIMEOUT_SELENIUM = 30
 
 
 # --- Redirigir prints a la consola de la GUI ---
@@ -36,6 +53,167 @@ class ConsoleRedirector:
 
     def flush(self):
         pass
+
+
+# --- Lógica RPA: Descarga desde MFT ---
+def ejecutar_rpa(carpeta_destino):
+    """Ejecuta el RPA completo: login, descarga, descomprime y copia a desembolsos_diarios."""
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from webdriver_manager.chrome import ChromeDriverManager
+
+    def esperar_elemento(driver, by, valor, timeout=TIMEOUT_SELENIUM):
+        return WebDriverWait(driver, timeout).until(
+            EC.element_to_be_clickable((by, valor))
+        )
+
+    driver = None
+    try:
+        # Crear driver
+        print("🚀 Iniciando RPA - Descarga desde MFT...")
+        chrome_options = Options()
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--allow-insecure-localhost")
+        chrome_options.add_experimental_option("prefs", {
+            "download.default_directory": CARPETA_DESCARGA,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": True,
+        })
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.maximize_window()
+
+        # Login
+        print("🌐 Navegando a MFT...")
+        driver.get(URL_MFT)
+        time.sleep(2)
+
+        print("👤 Ingresando usuario...")
+        campo_usuario = esperar_elemento(driver, By.ID, "username")
+        campo_usuario.clear()
+        campo_usuario.send_keys(USUARIO)
+
+        print("🔑 Ingresando contraseña...")
+        campo_password = esperar_elemento(driver, By.ID, "value")
+        campo_password.clear()
+        campo_password.send_keys(PASSWORD)
+
+        print("🔓 Iniciando sesión...")
+        boton_login = esperar_elemento(driver, By.ID, "j_id_1o")
+        boton_login.click()
+        time.sleep(3)
+        print("✅ Login exitoso.")
+
+        # Navegar a carpeta
+        print("📂 Navegando a la carpeta de archivos...")
+        enlace_carpeta = esperar_elemento(driver, By.ID, "fileListForm:j_id_8l:0:j_id_8s")
+        enlace_carpeta.click()
+        time.sleep(3)
+        print("✅ Carpeta abierta.")
+
+        # Seleccionar todos
+        print("☑️  Seleccionando todos los archivos...")
+        try:
+            checkbox = WebDriverWait(driver, TIMEOUT_SELENIUM).until(
+                EC.element_to_be_clickable((
+                    By.CSS_SELECTOR,
+                    "div.ui-chkbox-box.ui-widget.ui-corner-all.ui-state-default"
+                ))
+            )
+            checkbox.click()
+        except Exception:
+            print("⚠️  Click directo falló, intentando con JavaScript...")
+            checkbox = driver.find_element(
+                By.CSS_SELECTOR,
+                "div.ui-chkbox-box.ui-widget.ui-corner-all.ui-state-default"
+            )
+            driver.execute_script("arguments[0].click();", checkbox)
+        time.sleep(2)
+        print("✅ Todos los archivos seleccionados.")
+
+        # Descargar
+        print("⬇️  Descargando archivos...")
+        boton_descarga = esperar_elemento(driver, By.ID, "downloadFiles:downloadFiles")
+        boton_descarga.click()
+        time.sleep(5)
+        print("✅ Descarga iniciada.")
+
+        # Esperar descargas
+        print("⏳ Esperando a que finalicen las descargas...")
+        inicio = time.time()
+        while time.time() - inicio < 120:
+            archivos = os.listdir(CARPETA_DESCARGA)
+            if archivos and not any(f.endswith(".crdownload") for f in archivos):
+                print("✅ Descarga completada.")
+                break
+            time.sleep(2)
+
+        # Buscar ZIP más reciente
+        print("🔍 Buscando el ZIP más reciente en Downloads...")
+        archivos_zip = glob.glob(os.path.join(CARPETA_DESCARGA, "*.zip"))
+        if not archivos_zip:
+            raise FileNotFoundError("No se encontró ningún archivo .zip en Downloads")
+        zip_reciente = max(archivos_zip, key=os.path.getmtime)
+        print(f"✅ ZIP encontrado: {os.path.basename(zip_reciente)}")
+
+        # Descomprimir y copiar
+        carpeta_temp = os.path.join(CARPETA_DESCARGA, "_temp_rpa_extract")
+        if os.path.exists(carpeta_temp):
+            shutil.rmtree(carpeta_temp)
+
+        print(f"📦 Descomprimiendo {os.path.basename(zip_reciente)}...")
+        with zipfile.ZipFile(zip_reciente, 'r') as zip_ref:
+            zip_ref.extractall(carpeta_temp)
+
+        contenido = os.listdir(carpeta_temp)
+        if len(contenido) == 1 and os.path.isdir(os.path.join(carpeta_temp, contenido[0])):
+            carpeta_origen = os.path.join(carpeta_temp, contenido[0])
+        else:
+            carpeta_origen = carpeta_temp
+
+        os.makedirs(carpeta_destino, exist_ok=True)
+        reemplazados = 0
+        nuevos = 0
+        for item in os.listdir(carpeta_origen):
+            origen = os.path.join(carpeta_origen, item)
+            destino = os.path.join(carpeta_destino, item)
+            ya_existia = os.path.exists(destino)
+            if os.path.isfile(origen):
+                shutil.copy2(origen, destino)
+            elif os.path.isdir(origen):
+                if os.path.exists(destino):
+                    shutil.rmtree(destino)
+                shutil.copytree(origen, destino)
+            if ya_existia:
+                reemplazados += 1
+            else:
+                nuevos += 1
+
+        print(f"📋 Archivos copiados a desembolsos_diarios/")
+        print(f"   📄 Reemplazados: {reemplazados} | Nuevos: {nuevos}")
+
+        shutil.rmtree(carpeta_temp)
+        print("🧹 Carpeta temporal eliminada.")
+        print("✅ RPA completado exitosamente.\n")
+        return True
+
+    except Exception as e:
+        print(f"❌ Error en RPA: {e}")
+        if driver:
+            driver.save_screenshot("error_screenshot.png")
+            print("📸 Screenshot de error guardado.")
+        return False
+    finally:
+        if driver:
+            driver.quit()
+            print("🔒 Navegador cerrado.")
 
 
 # --- Lógica de procesamiento ---
@@ -199,25 +377,57 @@ class AppPricing(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Reporte Pricing - Banco de Bogotá")
-        self.geometry("720x580")
+        self.geometry("720x650")
         self.resizable(False, False)
 
-        # Rutas fijas
+        # Ícono de la ventana
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        self.archivo_suite = os.path.join(script_dir, "excelFiles", "Reporte de Suite_Digital.xlsx")
-        self.carpeta_txt = os.path.join(script_dir, "desembolsos_diarios")
-        self.default_salida = os.path.join(script_dir, "excelFiles")
+        if getattr(sys, 'frozen', False):
+            icon_base = sys._MEIPASS
+        else:
+            icon_base = script_dir
+        logo_path = os.path.join(icon_base, "images", "logoWhite.png")
+        if os.path.exists(logo_path):
+            from PIL import Image, ImageTk
+            img = Image.open(logo_path).convert("RGBA").resize((32, 32))
+            self._icon = ImageTk.PhotoImage(img)
+            self.iconphoto(False, self._icon)
+
+        # Rutas fijas
+        # Detectar si corre empaquetado (PyInstaller) o desde código fuente
+        if getattr(sys, 'frozen', False):
+            # Empaquetado: usar carpeta de trabajo en Documents del usuario
+            base_dir = os.path.join(os.path.expanduser("~"), "Documents", "ReportePricing")
+            os.makedirs(os.path.join(base_dir, "excelFiles"), exist_ok=True)
+            os.makedirs(os.path.join(base_dir, "desembolsos_diarios"), exist_ok=True)
+            # Para imágenes empaquetadas dentro del .app
+            bundle_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            bundle_dir = base_dir
+
+        self.base_dir = base_dir
+        self.archivo_suite = os.path.join(base_dir, "excelFiles", "Reporte de Suite_Digital.xlsx")
+        self.carpeta_txt = os.path.join(base_dir, "desembolsos_diarios")
+        self.default_salida = os.path.join(base_dir, "excelFiles")
 
         # Variables
         self.ruta_pricing = ""
-        self.ruta_salida = self.default_salida
+        self.ruta_salida = ""
 
         self._crear_interfaz()
 
     def _crear_interfaz(self):
-        # Título
-        ctk.CTkLabel(self, text="Reporte Pricing", font=ctk.CTkFont(size=24, weight="bold")).pack(
-            pady=(20, 0), padx=30, anchor="w")
+        # Título + marca de agua en la misma línea
+        row_title = ctk.CTkFrame(self, fg_color="transparent")
+        row_title.pack(fill="x", padx=30, pady=(20, 0))
+        ctk.CTkLabel(row_title, text="Reporte Pricing",
+                     font=ctk.CTkFont(size=24, weight="bold")).pack(side="left")
+        ctk.CTkLabel(row_title, text="Powered By ADL - JP",
+                     font=ctk.CTkFont(size=10, slant="italic"),
+                     text_color="#666666").pack(side="right", pady=(8, 0))
+
+        # Subtítulo
         ctk.CTkLabel(self, text="Banco de Bogotá  —  Generador de reportes",
                      font=ctk.CTkFont(size=13), text_color="gray").pack(padx=30, anchor="w", pady=(2, 18))
 
@@ -252,15 +462,21 @@ class AppPricing(ctk.CTk):
         row2 = ctk.CTkFrame(card2, fg_color="transparent")
         row2.pack(fill="x", padx=15, pady=(0, 12))
 
-        self.entry_salida = ctk.CTkEntry(row2, font=ctk.CTkFont(size=12), height=35, state="readonly")
+        self.entry_salida = ctk.CTkEntry(row2, font=ctk.CTkFont(size=12), height=35,
+                                         placeholder_text="Ninguna carpeta seleccionada...",
+                                         state="readonly")
         self.entry_salida.pack(side="left", fill="x", expand=True)
-        # Mostrar ruta por defecto
-        self.entry_salida.configure(state="normal")
-        self.entry_salida.insert(0, self.ruta_salida)
-        self.entry_salida.configure(state="readonly")
 
         ctk.CTkButton(row2, text="Seleccionar carpeta", width=160, height=35,
                       command=self._seleccionar_carpeta_salida).pack(side="right", padx=(10, 0))
+
+        # --- Checkbox RPA ---
+        self.rpa_activado = ctk.BooleanVar(value=False)
+        self.chk_rpa = ctk.CTkCheckBox(
+            self, text="🌐  Descargar desembolsos desde MFT antes de procesar (RPA)",
+            variable=self.rpa_activado, font=ctk.CTkFont(size=13)
+        )
+        self.chk_rpa.pack(padx=30, pady=(5, 5), anchor="w")
 
         # --- Botón procesar ---
         self.btn_procesar = ctk.CTkButton(self, text="▶  Procesar Reporte", height=45,
@@ -299,10 +515,10 @@ class AppPricing(ctk.CTk):
 
     def _iniciar_proceso(self):
         if not self.ruta_pricing:
-            messagebox.showwarning("Campo requerido", "Selecciona el archivo de Pricing.")
+            messagebox.showwarning("Campo requerido", "Por favor selecciona el archivo de Pricing desde tu equipo.")
             return
         if not self.ruta_salida:
-            messagebox.showwarning("Campo requerido", "Selecciona la carpeta de salida.")
+            messagebox.showwarning("Campo requerido", "Por favor selecciona una carpeta de salida en tu equipo.")
             return
 
         # Limpiar consola
@@ -319,6 +535,17 @@ class AppPricing(ctk.CTk):
         salida = os.path.join(self.ruta_salida, f"Reporte_Pricing_Actualizado_{hoy}.xlsx")
 
         def proceso():
+            exito = True
+
+            # Paso 1: RPA si está activado
+            if self.rpa_activado.get():
+                exito = ejecutar_rpa(carpeta_destino=self.carpeta_txt)
+                if not exito:
+                    self.after(0, self._proceso_terminado, False)
+                    return
+
+            # Paso 2: Procesar reporte
+            print("📊 Iniciando procesamiento del reporte...")
             resultado = ejecutar_procesamiento(
                 archivo_pricing=self.ruta_pricing,
                 archivo_suite=self.archivo_suite,
