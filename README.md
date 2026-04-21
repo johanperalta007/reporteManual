@@ -39,13 +39,11 @@ pip install pandas openpyxl customtkinter selenium webdriver-manager python-dote
 
 ---
 
-## 🚀 Ejecución
-
-### Interfaz gráfica (recomendado)
+### Script de pricing por terminal
 
 ```bash
 source venv313/bin/activate
-python app_pricing.py
+python "script_pricing_filtrado_ordenado_mantiene color AV.py"
 ```
 
 ### RPA por terminal (descarga + procesamiento)
@@ -55,14 +53,17 @@ source venv313/bin/activate
 python rpa_descarga_mft.py
 ```
 
-### Script de pricing por terminal
+## 🚀 Ejecución
+
+### Interfaz gráfica (recomendado)
 
 ```bash
+python3.13 -m venv venv313
 source venv313/bin/activate
-python "script_pricing_filtrado_ordenado_mantiene color AV.py"
-```
 
----
+python app_pricing.py
+```
+____________________________________________________________________________________
 
 ## 📦 Generar instalador
 
@@ -84,7 +85,7 @@ python build_app.py
 **Paso 3:** Generar el `.dmg` (instalador distribuible):
 
 ```bash
-create-dmg \
+rm -f dist/rw.*.dmg dist/Reporte_Pricing_Installer.dmg && create-dmg \
   --volname "Reporte Pricing" \
   --window-pos 200 120 \
   --window-size 600 400 \

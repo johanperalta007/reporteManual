@@ -28,11 +28,22 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURACIÓN ---
+# --- CONFIGURACIÓN (desde config.ini) ---
+import configparser
+
+def _cargar_config_rpa():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    ruta_config = os.path.join(script_dir, "config.ini")
+    config = configparser.ConfigParser()
+    if os.path.exists(ruta_config):
+        config.read(ruta_config, encoding="utf-8")
+    return config
+
+_CONFIG = _cargar_config_rpa()
 URL_MFT = "https://mft.bancodebogota.com.co:4443/webclient/Login.xhtml"
-USUARIO = "carlos.angulo"          # Reemplazar con el usuario real
-PASSWORD = "m<t6fFui"      # Reemplazar con la contraseña real
-CARPETA_DESCARGA = "/Users/johan.peralta/Downloads"
+USUARIO = _CONFIG.get("MFT", "usuario", fallback="")
+PASSWORD = _CONFIG.get("MFT", "password", fallback="")
+CARPETA_DESCARGA = os.path.join(os.path.expanduser("~"), "Downloads")
 CARPETA_DESTINO = "/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project/desembolsos_diarios"
 CARPETA_PROYECTO = "/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project"
 SCRIPT_PRICING = "script_pricing_filtrado_ordenado_mantiene color AV.py"

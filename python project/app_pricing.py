@@ -23,15 +23,52 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
+import configparser
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
-# --- Configuración RPA ---
+# --- Configuración desde archivo ---
+def obtener_carpeta_config():
+    """Retorna la carpeta base de configuración según el entorno."""
+    if getattr(sys, 'frozen', False):
+        return os.path.join(os.path.expanduser("~"), "Documents", "ReportePricing")
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+def cargar_config():
+    """Carga la configuración desde config.ini. Si no existe, lo crea con valores por defecto."""
+    carpeta = obtener_carpeta_config()
+    os.makedirs(carpeta, exist_ok=True)
+    ruta_config = os.path.join(carpeta, "config.ini")
+
+    config = configparser.ConfigParser()
+
+    if not os.path.exists(ruta_config):
+        # Crear config.ini con valores por defecto
+        config["MFT"] = {
+            "usuario": "",
+            "password": "",
+        }
+        with open(ruta_config, "w", encoding="utf-8") as f:
+            f.write("# ============================================================\n")
+            f.write("# CONFIGURACIÓN DE REPORTE PRICING\n")
+            f.write("# Editar este archivo con tus credenciales y rutas.\n")
+            f.write("# ============================================================\n\n")
+            config.write(f)
+        print(f"📄 Archivo de configuración creado en: {ruta_config}")
+        print("   ⚠️  Edita config.ini con tus credenciales antes de usar el RPA.")
+
+    config.read(ruta_config, encoding="utf-8")
+    return config
+
+CONFIG = cargar_config()
+
+# --- Configuración RPA (desde config.ini) ---
 URL_MFT = "https://mft.bancodebogota.com.co:4443/webclient/Login.xhtml"
-USUARIO = "carlos.angulo"
-PASSWORD = "m<t6fFui"
-CARPETA_DESCARGA = "/Users/johan.peralta/Downloads"
+USUARIO = CONFIG.get("MFT", "usuario", fallback="")
+PASSWORD = CONFIG.get("MFT", "password", fallback="")
+CARPETA_DESCARGA = os.path.join(os.path.expanduser("~"), "Downloads")
 TIMEOUT_SELENIUM = 30
 
 
@@ -73,6 +110,15 @@ def ejecutar_rpa(carpeta_destino):
 
     driver = None
     try:
+        # Validar credenciales
+        if not USUARIO or not PASSWORD:
+            carpeta = obtener_carpeta_config()
+            ruta_config = os.path.join(carpeta, "config.ini")
+            print(f"❌ Credenciales no configuradas.")
+            print(f"   Edita el archivo: {ruta_config}")
+            print(f"   Agrega tu usuario y contraseña en la sección [MFT]")
+            return False
+
         # Crear driver
         print("🚀 Iniciando RPA - Descarga desde MFT...")
         chrome_options = Options()
