@@ -110,8 +110,9 @@ rm -f dist/rw.*.dmg dist/Reporte_Pricing_Installer.dmg && create-dmg \
 **Paso 2:** Crear entorno virtual *(solo la primera vez)*:
 
 ```bash
-python -m venv venv313
-venv313\Scripts\activate
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+python -m venv "python project/venv"
+
 pip install pandas openpyxl customtkinter selenium webdriver-manager Pillow pyinstaller
 ```
 
