@@ -21,7 +21,13 @@ import PyInstaller.__main__
 # Rutas
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_SCRIPT = os.path.join(SCRIPT_DIR, "app_pricing.py")
-ICON_PATH = os.path.join(SCRIPT_DIR, "images", "logoWhite.png")
+
+# Ícono según plataforma
+if platform.system() == "Darwin":  # Mac
+    ICON_PATH = os.path.join(SCRIPT_DIR, "images", "logoWhite.png")
+else:  # Windows
+    ICON_PATH = os.path.join(SCRIPT_DIR, "images", "logoWhite.ico")
+
 IMAGES_DIR = os.path.join(SCRIPT_DIR, "images")
 
 # Nombre de la app
