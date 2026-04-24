@@ -121,6 +121,7 @@ def ejecutar_rpa(carpeta_destino):
 
         # Crear driver
         print("🚀 Iniciando RPA - Descarga desde MFT...")
+        print("🔧 Descargando ChromeDriver compatible...")
         chrome_options = Options()
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -132,7 +133,10 @@ def ejecutar_rpa(carpeta_destino):
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True,
         })
-        service = Service(ChromeDriverManager().install())
+        # Descargar ChromeDriver en carpeta del usuario (no empaquetado)
+        driver_path = ChromeDriverManager(path=os.path.join(
+            os.path.expanduser("~"), ".wdm")).install()
+        service = Service(driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.maximize_window()
 
