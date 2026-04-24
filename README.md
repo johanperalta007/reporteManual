@@ -85,7 +85,7 @@ python build_app.py
 **Paso 3:** Generar el `.dmg` (instalador distribuible):
 
 ```bash
-rm -f dist/rw.*.dmg dist/Reporte_Pricing_Installer.dmg && create-dmg \
+rm -f dist/*.dmg dist/Reporte_Pricing_Installer.dmg && create-dmg \
   --volname "Reporte Pricing" \
   --window-pos 200 120 \
   --window-size 600 400 \
