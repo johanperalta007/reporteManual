@@ -134,8 +134,8 @@ def ejecutar_rpa(carpeta_destino):
             "safebrowsing.enabled": True,
         })
         # Descargar ChromeDriver en carpeta del usuario (no empaquetado)
-        driver_path = ChromeDriverManager(path=os.path.join(
-            os.path.expanduser("~"), ".wdm")).install()
+        os.environ['WDM_LOCAL'] = '0'
+        driver_path = ChromeDriverManager().install()
         service = Service(driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.maximize_window()

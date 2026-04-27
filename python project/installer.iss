@@ -1,6 +1,6 @@
 [Setup]
 AppName=Reporte Pricing
-AppVersion=1.0
+AppVersion=1.0.2
 AppPublisher=ADL - JP
 DefaultDirName={autopf}\Reporte Pricing
 DefaultGroupName=Reporte Pricing

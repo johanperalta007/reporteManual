@@ -44,8 +44,8 @@ URL_MFT = "https://mft.bancodebogota.com.co:4443/webclient/Login.xhtml"
 USUARIO = _CONFIG.get("MFT", "usuario", fallback="")
 PASSWORD = _CONFIG.get("MFT", "password", fallback="")
 CARPETA_DESCARGA = os.path.join(os.path.expanduser("~"), "Downloads")
-CARPETA_DESTINO = "/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project/desembolsos_diarios"
-CARPETA_PROYECTO = "/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project"
+CARPETA_DESTINO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "desembolsos_diarios")
+CARPETA_PROYECTO = os.path.dirname(os.path.abspath(__file__))
 SCRIPT_PRICING = "script_pricing_filtrado_ordenado_mantiene color AV.py"
 TIMEOUT = 30  # segundos de espera máxima por elemento
 
