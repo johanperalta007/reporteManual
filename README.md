@@ -107,15 +107,7 @@ rm -f dist/*.dmg dist/Reporte_Pricing_Installer.dmg && create-dmg \
 
 **Paso 1:** Abrir terminal git Bash y ubicarse en la carpeta del proyecto.
 
-**Paso 2:** Crear entorno virtual *(solo la primera vez)*:
-
-```bash
-python -m venv venv313
-
-pip install pandas openpyxl customtkinter selenium webdriver-manager Pillow pyinstaller
-```
-
-**Paso 3:** Activar entorno virtual *(si ya existe)*:
+**Paso 2:** Activar entorno virtual *(si ya existe)*:
 
 ```bash
 source venv313/Scripts/activate

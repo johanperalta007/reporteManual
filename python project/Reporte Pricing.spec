@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project/app_pricing.py'],
+    ['C:\\Users\\Johan\\Documents\\reporteManual\\python project\\app_pricing.py'],
     pathex=[],
     binaries=[],
-    datas=[('/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project/images', 'images')],
+    datas=[('C:\\Users\\Johan\\Documents\\reporteManual\\python project\\images', 'images')],
     hiddenimports=['customtkinter', 'PIL', 'PIL._tkinter_finder', 'pandas', 'openpyxl', 'selenium', 'selenium.webdriver', 'selenium.webdriver.chrome', 'selenium.webdriver.chrome.webdriver', 'selenium.webdriver.chrome.service', 'selenium.webdriver.chrome.options', 'selenium.webdriver.common', 'selenium.webdriver.common.by', 'selenium.webdriver.support', 'selenium.webdriver.support.ui', 'selenium.webdriver.support.expected_conditions', 'webdriver_manager', 'webdriver_manager.chrome', 'webdriver_manager.core', 'urllib3', 'requests'],
     hookspath=[],
     hooksconfig={},
@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project/images/logoWhite.png'],
+    icon=['C:\\Users\\Johan\\Documents\\reporteManual\\python project\\images\\logoWhite.ico'],
 )
 coll = COLLECT(
     exe,
@@ -42,10 +42,4 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name='Reporte Pricing',
-)
-app = BUNDLE(
-    coll,
-    name='Reporte Pricing.app',
-    icon='/Users/johan.peralta/Documents/Banco de Bogota/Development/reporte manual /python project/images/logoWhite.png',
-    bundle_identifier=None,
 )
